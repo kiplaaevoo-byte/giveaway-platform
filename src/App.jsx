@@ -10,11 +10,14 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Giveaways from "./pages/Giveaways";
+import GiveawayDetails from "./pages/GiveawayDetails";
 import Winners from "./pages/Winners";
 
 // Authentication
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // User Pages
 import Dashboard from "./pages/Dashboard";
@@ -26,23 +29,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 // Error Page
 import NotFound from "./pages/NotFound";
 
-// Temporary Forgot Password Page
-function ForgotPassword() {
-  return (
-    <div className="min-h-[70vh] flex items-center justify-center px-6">
-      <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center">
-        <h1 className="text-3xl font-bold mb-4">
-          Forgot Password
-        </h1>
-
-        <p className="text-gray-600">
-          Password reset functionality will be added in the next update.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function App() {
   return (
     <BrowserRouter>
@@ -53,7 +39,6 @@ function App() {
 
         {/* Main Content */}
         <main className="flex-1">
-
           <Routes>
 
             {/* ================= PUBLIC ================= */}
@@ -66,6 +51,11 @@ function App() {
 
             <Route path="/giveaways" element={<Giveaways />} />
 
+            <Route
+              path="/giveaways/:id"
+              element={<GiveawayDetails />}
+            />
+
             <Route path="/winners" element={<Winners />} />
 
             {/* ================= AUTH ================= */}
@@ -77,6 +67,11 @@ function App() {
             <Route
               path="/forgot-password"
               element={<ForgotPassword />}
+            />
+
+            <Route
+              path="/reset-password"
+              element={<ResetPassword />}
             />
 
             {/* ================= USER ================= */}
@@ -112,10 +107,12 @@ function App() {
 
             {/* ================= 404 ================= */}
 
-            <Route path="*" element={<NotFound />} />
+            <Route
+              path="*"
+              element={<NotFound />}
+            />
 
           </Routes>
-
         </main>
 
         {/* Footer */}

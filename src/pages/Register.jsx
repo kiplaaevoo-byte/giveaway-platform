@@ -17,12 +17,13 @@ export default function Register() {
   const [success, setSuccess] = useState("");
 
   function handleChange(e) {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
 
     setError("");
+    setSuccess("");
   }
 
   async function handleSubmit(e) {
@@ -32,8 +33,8 @@ export default function Register() {
     setSuccess("");
 
     if (
-      !form.fullName ||
-      !form.email ||
+      !form.fullName.trim() ||
+      !form.email.trim() ||
       !form.password ||
       !form.confirmPassword
     ) {
@@ -54,28 +55,41 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: form.email,
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email.trim(),
         password: form.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/login`,
           data: {
-            full_name: form.fullName,
+            full_name: form.fullName.trim(),
           },
         },
       });
 
       if (error) throw error;
 
+      if (data.user && data.user.identities?.length === 0) {
+        setError("An account with this email already exists.");
+        return;
+      }
+
       setSuccess(
         "Account created successfully! Please check your email to verify your account."
       );
+
+      setForm({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
 
       setTimeout(() => {
         navigate("/login");
       }, 3000);
 
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -83,41 +97,34 @@ export default function Register() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8">
 
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8">
-
-        <div className="text-center mb-8">
-
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900">
             Create Account
           </h1>
 
-          <p className="text-gray-500 mt-2">
+          <p className="mt-2 text-gray-500">
             Join Giveaway Hub today.
           </p>
-
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-100 border border-red-300 text-red-700 px-4 py-3">
+          <div className="mb-5 rounded-lg border border-red-300 bg-red-100 p-3 text-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 rounded-lg bg-green-100 border border-green-300 text-green-700 px-4 py-3">
+          <div className="mb-5 rounded-lg border border-green-300 bg-green-100 p-3 text-green-700">
             {success}
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
+        <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
-
-            <label className="block mb-2 font-medium">
+            <label className="mb-2 block font-medium">
               Full Name
             </label>
 
@@ -127,14 +134,12 @@ export default function Register() {
               value={form.fullName}
               onChange={handleChange}
               placeholder="John Doe"
-              className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-
           </div>
 
           <div>
-
-            <label className="block mb-2 font-medium">
+            <label className="mb-2 block font-medium">
               Email
             </label>
 
@@ -144,14 +149,12 @@ export default function Register() {
               value={form.email}
               onChange={handleChange}
               placeholder="john@example.com"
-              className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-
           </div>
 
           <div>
-
-            <label className="block mb-2 font-medium">
+            <label className="mb-2 block font-medium">
               Password
             </label>
 
@@ -160,15 +163,13 @@ export default function Register() {
               name="password"
               value={form.password}
               onChange={handleChange}
-              placeholder="********"
-              className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Minimum 6 characters"
+              className="w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-
           </div>
 
           <div>
-
-            <label className="block mb-2 font-medium">
+            <label className="mb-2 block font-medium">
               Confirm Password
             </label>
 
@@ -177,16 +178,15 @@ export default function Register() {
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
-              placeholder="********"
-              className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Re-enter password"
+              className="w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+            className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -194,22 +194,19 @@ export default function Register() {
         </form>
 
         <div className="mt-6 text-center">
-
           <p className="text-gray-600">
             Already have an account?
           </p>
 
           <Link
             to="/login"
-            className="text-blue-600 font-semibold hover:underline"
+            className="font-semibold text-blue-600 hover:underline"
           >
             Login
           </Link>
-
         </div>
 
       </div>
-
     </div>
   );
 }
