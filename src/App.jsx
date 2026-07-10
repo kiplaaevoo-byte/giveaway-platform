@@ -22,6 +22,8 @@ import ResetPassword from "./pages/ResetPassword";
 // User Pages
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import MyEntries from "./pages/MyEntries";
+import Notifications from "./pages/Notifications";
 
 // Admin
 import AdminDashboard from "./pages/AdminDashboard";
@@ -32,16 +34,21 @@ import NotFound from "./pages/NotFound";
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-slate-50">
+      <div className="min-h-screen flex flex-col bg-slate-100">
 
-        {/* Header */}
+        {/* ================= HEADER ================= */}
+
         <Navbar />
 
-        {/* Main Content */}
+        {/* ================= MAIN CONTENT ================= */}
+
         <main className="flex-1">
+
           <Routes>
 
-            {/* ================= PUBLIC ================= */}
+            {/* =====================================================
+                              PUBLIC ROUTES
+            ====================================================== */}
 
             <Route path="/" element={<Home />} />
 
@@ -58,11 +65,19 @@ function App() {
 
             <Route path="/winners" element={<Winners />} />
 
-            {/* ================= AUTH ================= */}
+            {/* =====================================================
+                           AUTHENTICATION ROUTES
+            ====================================================== */}
 
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/login"
+              element={<Login />}
+            />
 
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/register"
+              element={<Register />}
+            />
 
             <Route
               path="/forgot-password"
@@ -74,7 +89,9 @@ function App() {
               element={<ResetPassword />}
             />
 
-            {/* ================= USER ================= */}
+            {/* =====================================================
+                             USER ROUTES
+            ====================================================== */}
 
             <Route
               path="/dashboard"
@@ -94,7 +111,27 @@ function App() {
               }
             />
 
-            {/* ================= ADMIN ================= */}
+            <Route
+              path="/my-entries"
+              element={
+                <ProtectedRoute>
+                  <MyEntries />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/notifications"
+              element={
+                <ProtectedRoute>
+                  <Notifications />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* =====================================================
+                              ADMIN ROUTES
+            ====================================================== */}
 
             <Route
               path="/admin"
@@ -105,7 +142,9 @@ function App() {
               }
             />
 
-            {/* ================= 404 ================= */}
+            {/* =====================================================
+                               404 PAGE
+            ====================================================== */}
 
             <Route
               path="*"
@@ -113,9 +152,10 @@ function App() {
             />
 
           </Routes>
+
         </main>
 
-        {/* Footer */}
+        {/* ================= FOOTER ================= */}
 
         <Footer />
 
