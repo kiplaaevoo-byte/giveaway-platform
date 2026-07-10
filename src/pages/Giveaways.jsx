@@ -1,126 +1,120 @@
-import { Link } from "react-router-dom";
-import useGiveaways from "../hooks/useGiveaways";
-import useAuth from "../hooks/useAuth";
+import { useEffect, useMemo, useState } from "react";
+
+import GiveawayGrid from "../components/giveaway/GiveawayGrid";
+import GiveawayFilters from "../components/giveaway/GiveawayFilters";
+
+import { getGiveaways } from "../services/giveawayService";
 
 export default function Giveaways() {
-  const { giveaways, loading, error } = useGiveaways();
-  const { user } = useAuth();
+  const [giveaways, setGiveaways] = useState([]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <h2 className="text-2xl font-semibold">
-          Loading giveaways...
-        </h2>
-      </div>
-    );
-  }
+  const [search, setSearch] = useState("");
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <p className="text-red-600">{error}</p>
-      </div>
-    );
-  }
+  const [category, setCategory] = useState("All");
+
+  const [sort, setSort] = useState("newest");
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const data = await getGiveaways();
+
+        setGiveaways(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    let list = [...giveaways];
+
+    if (search) {
+      list = list.filter((g) =>
+        g.title
+          ?.toLowerCase()
+          .includes(search.toLowerCase())
+      );
+    }
+
+    if (category !== "All") {
+      list = list.filter(
+        (g) => g.category === category
+      );
+    }
+
+    switch (sort) {
+      case "oldest":
+        list.sort(
+          (a, b) =>
+            new Date(a.created_at) -
+            new Date(b.created_at)
+        );
+        break;
+
+      case "prize_high":
+        list.sort(
+          (a, b) =>
+            b.prize_value - a.prize_value
+        );
+        break;
+
+      case "prize_low":
+        list.sort(
+          (a, b) =>
+            a.prize_value - b.prize_value
+        );
+        break;
+
+      case "ending":
+        list.sort(
+          (a, b) =>
+            new Date(a.end_date) -
+            new Date(b.end_date)
+        );
+        break;
+
+      default:
+        list.sort(
+          (a, b) =>
+            new Date(b.created_at) -
+            new Date(a.created_at)
+        );
+    }
+
+    return list;
+
+  }, [
+    giveaways,
+    search,
+    category,
+    sort,
+  ]);
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-7xl mx-auto px-6 py-8">
 
-      <div className="text-center mb-10">
+      <h1 className="text-4xl font-bold mb-2">
+        Giveaways
+      </h1>
 
-        <h1 className="text-4xl font-bold">
-          Live Giveaways
-        </h1>
+      <p className="text-gray-500 mb-8">
+        Browse all active giveaways.
+      </p>
 
-        <p className="text-gray-500 mt-3">
-          Enter today for your chance to win amazing prizes.
-        </p>
+      <GiveawayFilters
+        search={search}
+        setSearch={setSearch}
+        category={category}
+        setCategory={setCategory}
+        sort={sort}
+        setSort={setSort}
+      />
 
-      </div>
+      <GiveawayGrid giveaways={filtered} />
 
-      {giveaways.length === 0 ? (
-        <div className="text-center py-20">
-          <h2 className="text-2xl font-semibold">
-            No giveaways available.
-          </h2>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-          {giveaways.map((giveaway) => (
-
-            <div
-              key={giveaway.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden"
-            >
-
-              <img
-                src={giveaway.image}
-                alt={giveaway.title}
-                className="w-full h-56 object-cover"
-              />
-
-              <div className="p-6">
-
-                <h2 className="text-2xl font-bold">
-                  {giveaway.title}
-                </h2>
-
-                <p className="mt-3 text-gray-600">
-                  {giveaway.description}
-                </p>
-
-                <div className="mt-5">
-
-                  <p>
-                    <strong>Prize:</strong>{" "}
-                    {giveaway.prize}
-                  </p>
-
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span className="text-green-600 font-semibold">
-                      {giveaway.status}
-                    </span>
-                  </p>
-
-                  <p>
-                    <strong>Ends:</strong>{" "}
-                    {giveaway.end_date}
-                  </p>
-
-                </div>
-
-                <div className="mt-6">
-
-                  {user ? (
-                    <Link
-                      to={`/giveaways/${giveaway.id}`}
-                      className="block text-center bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
-                    >
-                      View Giveaway
-                    </Link>
-                  ) : (
-                    <Link
-                      to="/login"
-                      className="block text-center bg-gray-800 hover:bg-black text-white py-3 rounded-xl font-semibold"
-                    >
-                      Login to Enter
-                    </Link>
-                  )}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </div>
-      )}
-
-    </section>
+    </div>
   );
 }

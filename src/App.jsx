@@ -25,8 +25,15 @@ import Profile from "./pages/Profile";
 import MyEntries from "./pages/MyEntries";
 import Notifications from "./pages/Notifications";
 
-// Admin
+// Admin Pages
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminGiveaways from "./pages/AdminGiveaways";
+import AdminEntries from "./pages/AdminEntries";
+import AdminUsers from "./pages/AdminUsers";
+import AdminWinners from "./pages/AdminWinners";
+import AdminReports from "./pages/AdminReports";
+import AdminNotifications from "./pages/AdminNotifications";
+import AdminSettings from "./pages/AdminSettings";
 
 // Error Page
 import NotFound from "./pages/NotFound";
@@ -90,7 +97,7 @@ function App() {
             />
 
             {/* =====================================================
-                             USER ROUTES
+                              USER ROUTES
             ====================================================== */}
 
             <Route
@@ -138,6 +145,69 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/giveaways"
+              element={
+                <ProtectedRoute>
+                  <AdminGiveaways />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/entries"
+              element={
+                <ProtectedRoute>
+                  <AdminEntries />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/winners"
+              element={
+                <ProtectedRoute>
+                  <AdminWinners />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/reports"
+              element={
+                <ProtectedRoute>
+                  <AdminReports />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute>
+                  <AdminNotifications />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />

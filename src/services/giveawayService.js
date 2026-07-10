@@ -12,7 +12,7 @@ export async function getGiveaways() {
 
   if (error) throw error;
 
-  return data;
+  return data || [];
 }
 
 // ======================================
@@ -32,11 +32,108 @@ export async function getGiveaway(id) {
 }
 
 // ======================================
+// SEARCH GIVEAWAYS
+// ======================================
+
+export async function searchGiveaways(keyword) {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .ilike("title", `%${keyword}%`)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
+// GET GIVEAWAYS BY CATEGORY
+// ======================================
+
+export async function getGiveawaysByCategory(category) {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .eq("category", category)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
+// GET ACTIVE GIVEAWAYS
+// ======================================
+
+export async function getActiveGiveaways() {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .eq("status", "Active")
+    .order("end_date", { ascending: true });
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
+// GET FEATURED GIVEAWAYS
+// ======================================
+
+export async function getFeaturedGiveaways(limit = 6) {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .eq("status", "Active")
+    .order("prize_value", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
+// ENDING SOON
+// ======================================
+
+export async function getEndingSoon(limit = 6) {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .eq("status", "Active")
+    .order("end_date", { ascending: true })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
+// LATEST GIVEAWAYS
+// ======================================
+
+export async function getLatestGiveaways(limit = 8) {
+  const { data, error } = await supabase
+    .from("giveaways")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+// ======================================
 // ENTER GIVEAWAY
 // ======================================
 
 export async function enterGiveaway(giveawayId, userId) {
-  // Check if the user has already entered
   const { data: existing, error: checkError } = await supabase
     .from("entries")
     .select("id")
@@ -50,7 +147,6 @@ export async function enterGiveaway(giveawayId, userId) {
     throw new Error("You have already entered this giveaway.");
   }
 
-  // Generate unique ticket number
   const ticketNumber = `GH-${Date.now()}-${Math.floor(
     Math.random() * 10000
   )}`;
@@ -97,52 +193,49 @@ export async function getParticipantCount(giveawayId) {
 export async function getMyEntries(userId) {
   const { data, error } = await supabase
     .from("entries")
-    .select(
-      `
+    .select(`
       *,
       giveaways (
         id,
         title,
-        prize,
-        image,
+        category,
+        prize_value,
+        image_url,
         status,
         end_date
       )
-      `
-    )
+    `)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
 
-  return data;
+  return data || [];
 }
 
 // ======================================
-// GET WINNERS
+// WINNERS
 // ======================================
 
 export async function getWinners() {
   const { data, error } = await supabase
     .from("winners")
-    .select(
-      `
+    .select(`
       *,
       giveaways (
         id,
         title,
-        prize
+        prize_value
       ),
       profiles (
         full_name
       )
-      `
-    )
+    `)
     .order("announced_at", { ascending: false });
 
   if (error) throw error;
 
-  return data;
+  return data || [];
 }
 
 // ======================================
@@ -150,7 +243,7 @@ export async function getWinners() {
 // ======================================
 
 export async function getDashboardStats(userId) {
-  const { count: entriesCount, error: entriesError } = await supabase
+  const { count: entries } = await supabase
     .from("entries")
     .select("*", {
       count: "exact",
@@ -158,9 +251,7 @@ export async function getDashboardStats(userId) {
     })
     .eq("user_id", userId);
 
-  if (entriesError) throw entriesError;
-
-  const { count: winsCount, error: winsError } = await supabase
+  const { count: wins } = await supabase
     .from("winners")
     .select("*", {
       count: "exact",
@@ -168,20 +259,25 @@ export async function getDashboardStats(userId) {
     })
     .eq("user_id", userId);
 
-  if (winsError) throw winsError;
-
-  const { count: giveawaysCount, error: giveawaysError } = await supabase
+  const { count: giveaways } = await supabase
     .from("giveaways")
     .select("*", {
       count: "exact",
       head: true,
     });
 
-  if (giveawaysError) throw giveawaysError;
+  const { count: active } = await supabase
+    .from("giveaways")
+    .select("*", {
+      count: "exact",
+      head: true,
+    })
+    .eq("status", "Active");
 
   return {
-    entries: entriesCount ?? 0,
-    wins: winsCount ?? 0,
-    giveaways: giveawaysCount ?? 0,
+    entries: entries ?? 0,
+    wins: wins ?? 0,
+    giveaways: giveaways ?? 0,
+    activeGiveaways: active ?? 0,
   };
 }
