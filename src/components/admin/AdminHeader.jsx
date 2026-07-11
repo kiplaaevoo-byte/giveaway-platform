@@ -1,31 +1,52 @@
-import { Bell } from "lucide-react";
+import { UserCircle } from "lucide-react";
 
-export default function AdminHeader() {
+
+export default function AdminHeader(){
+
+
   return (
-    <header className="bg-white shadow rounded-2xl p-6 flex justify-between items-center">
+
+    <header className="bg-white rounded-xl shadow p-5 flex justify-between items-center">
+
 
       <div>
 
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-2xl font-bold">
           Admin Dashboard
         </h2>
 
         <p className="text-gray-500">
-          Welcome back Administrator
+          Manage your giveaway platform
         </p>
 
       </div>
 
-      <button className="relative">
 
-        <Bell size={24} />
 
-        <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-xs px-2">
-          3
-        </span>
+      <div className="flex items-center gap-3">
 
-      </button>
+
+        <UserCircle size={40}/>
+
+
+        <div>
+
+          <p className="font-semibold">
+            Administrator
+          </p>
+
+          <p className="text-sm text-gray-500">
+            Admin Account
+          </p>
+
+        </div>
+
+
+      </div>
+
 
     </header>
+
   );
+
 }

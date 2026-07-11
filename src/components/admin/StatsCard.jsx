@@ -1,36 +1,43 @@
 export default function StatsCard({
   title,
   value,
-  icon,
-  color = "bg-blue-600",
-}) {
-  const Icon = icon;
+  icon: Icon,
+  color
+}){
+
 
   return (
-    <div className="bg-white rounded-2xl shadow p-6">
 
-      <div className="flex justify-between items-center">
+    <div className="bg-white rounded-xl shadow p-5 flex justify-between items-center">
 
-        <div>
 
-          <p className="text-gray-500">
-            {title}
-          </p>
+      <div>
 
-          <h2 className="text-3xl font-bold mt-2">
-            {value}
-          </h2>
+        <p className="text-gray-500">
+          {title}
+        </p>
 
-        </div>
 
-        <div
-          className={`${color} p-4 rounded-xl text-white`}
-        >
-          <Icon size={28} />
-        </div>
+        <h2 className="text-4xl font-bold mt-2">
+          {value}
+        </h2>
+
 
       </div>
 
+
+
+      <div
+        className={`${color} text-white p-4 rounded-xl`}
+      >
+
+        <Icon size={30}/>
+
+      </div>
+
+
     </div>
+
   );
+
 }

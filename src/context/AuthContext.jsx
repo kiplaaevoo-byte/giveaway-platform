@@ -1,70 +1,190 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../supabaseClient";
+
 
 const AuthContext = createContext(null);
 
+
+
 export function AuthProvider({ children }) {
+
+
   const [session, setSession] = useState(null);
+
   const [user, setUser] = useState(null);
+
   const [loading, setLoading] = useState(true);
 
+
+
+
   useEffect(() => {
+
+
     let mounted = true;
 
-    async function loadSession() {
+
+
+    async function loadSession(){
+
+
       const {
-        data: { session },
+        data: {
+          session
+        }
       } = await supabase.auth.getSession();
 
-      if (!mounted) return;
+
+
+      if(!mounted) return;
+
+
 
       setSession(session);
-      setUser(session?.user ?? null);
+
+      setUser(
+        session?.user ?? null
+      );
+
       setLoading(false);
+
+
     }
+
+
+
+
 
     loadSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ??null);
-      setLoading(false);
-    });
 
-    return () => {
+
+
+
+    const {
+      data:{
+        subscription
+      }
+    } = supabase.auth.onAuthStateChange(
+      (_event, session)=>{
+
+
+        if(!mounted) return;
+
+
+        setSession(session);
+
+        setUser(
+          session?.user ?? null
+        );
+
+        setLoading(false);
+
+
+      }
+    );
+
+
+
+
+
+    return ()=>{
+
+
       mounted = false;
+
+
       subscription.unsubscribe();
+
+
     };
+
+
+
   }, []);
 
-  async function signOut() {
+
+
+
+
+
+
+  async function signOut(){
+
+
     await supabase.auth.signOut();
+
+
+    setSession(null);
+
+    setUser(null);
+
+
   }
 
+
+
+
+
+
+
   return (
+
+
     <AuthContext.Provider
+
       value={{
+
         user,
+
         session,
+
         loading,
+
         signOut,
+
       }}
+
     >
+
+
       {children}
+
+
     </AuthContext.Provider>
+
+
   );
+
+
 }
 
-export function useAuthContext() {
+
+
+
+
+
+
+export function useAuthContext(){
+
+
   const context = useContext(AuthContext);
 
-  if (!context) {
+
+
+  if(!context){
+
+
     throw new Error(
       "useAuth must be used inside AuthProvider."
     );
+
+
   }
 
+
+
   return context;
+
+
 }

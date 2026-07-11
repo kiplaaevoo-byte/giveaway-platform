@@ -1,58 +1,57 @@
+import { Link } from "react-router-dom";
 import {
   Plus,
-  Trophy,
-  Users,
-  Bell,
+  Trophy
 } from "lucide-react";
 
-export default function QuickActions() {
-  const actions = [
-    {
-      icon: Plus,
-      text: "Create Giveaway",
-    },
-    {
-      icon: Trophy,
-      text: "Draw Winner",
-    },
-    {
-      icon: Users,
-      text: "View Users",
-    },
-    {
-      icon: Bell,
-      text: "Send Notice",
-    },
-  ];
+
+export default function QuickActions(){
+
 
   return (
-    <div className="bg-white rounded-2xl shadow p-6">
 
-      <h2 className="font-bold text-xl mb-6">
+    <div className="bg-white rounded-xl shadow p-6">
+
+
+      <h2 className="text-xl font-bold mb-5">
         Quick Actions
       </h2>
 
-      <div className="grid md:grid-cols-2 gap-4">
 
-        {actions.map((item) => {
-          const Icon = item.icon;
 
-          return (
-            <button
-              key={item.text}
-              className="border rounded-xl p-5 hover:bg-blue-50 transition"
-            >
-              <Icon className="mx-auto text-blue-600" />
+      <div className="space-y-3">
 
-              <p className="mt-3 font-semibold">
-                {item.text}
-              </p>
-            </button>
-          );
-        })}
+
+        <Link
+          to="/admin/giveaways"
+          className="flex items-center gap-3 bg-blue-600 text-white p-3 rounded-lg"
+        >
+
+          <Plus size={20}/>
+
+          Create Giveaway
+
+        </Link>
+
+
+
+        <Link
+          to="/admin/winners"
+          className="flex items-center gap-3 bg-purple-600 text-white p-3 rounded-lg"
+        >
+
+          <Trophy size={20}/>
+
+          Pick Winner
+
+        </Link>
+
 
       </div>
 
+
     </div>
+
   );
+
 }

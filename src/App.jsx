@@ -35,27 +35,27 @@ import AdminReports from "./pages/AdminReports";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminSettings from "./pages/AdminSettings";
 
-// Error Page
+// Error
 import NotFound from "./pages/NotFound";
 
-function App() {
-  return (
-    <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-slate-100">
 
-        {/* ================= HEADER ================= */}
+function App() {
+
+  return (
+
+    <BrowserRouter>
+
+      <div className="min-h-screen flex flex-col bg-slate-100">
 
         <Navbar />
 
-        {/* ================= MAIN CONTENT ================= */}
 
         <main className="flex-1">
 
           <Routes>
 
-            {/* =====================================================
-                              PUBLIC ROUTES
-            ====================================================== */}
+
+            {/* PUBLIC ROUTES */}
 
             <Route path="/" element={<Home />} />
 
@@ -65,40 +65,37 @@ function App() {
 
             <Route path="/giveaways" element={<Giveaways />} />
 
-            <Route
-              path="/giveaways/:id"
-              element={<GiveawayDetails />}
+            <Route 
+              path="/giveaways/:id" 
+              element={<GiveawayDetails />} 
             />
 
-            <Route path="/winners" element={<Winners />} />
-
-            {/* =====================================================
-                           AUTHENTICATION ROUTES
-            ====================================================== */}
-
-            <Route
-              path="/login"
-              element={<Login />}
+            <Route 
+              path="/winners" 
+              element={<Winners />} 
             />
 
-            <Route
-              path="/register"
-              element={<Register />}
+
+
+            {/* AUTH ROUTES */}
+
+            <Route path="/login" element={<Login />} />
+
+            <Route path="/register" element={<Register />} />
+
+            <Route 
+              path="/forgot-password" 
+              element={<ForgotPassword />} 
             />
 
-            <Route
-              path="/forgot-password"
-              element={<ForgotPassword />}
+            <Route 
+              path="/reset-password" 
+              element={<ResetPassword />} 
             />
 
-            <Route
-              path="/reset-password"
-              element={<ResetPassword />}
-            />
 
-            {/* =====================================================
-                              USER ROUTES
-            ====================================================== */}
+
+            {/* USER ROUTES */}
 
             <Route
               path="/dashboard"
@@ -109,6 +106,7 @@ function App() {
               }
             />
 
+
             <Route
               path="/profile"
               element={
@@ -117,6 +115,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
 
             <Route
               path="/my-entries"
@@ -127,6 +126,7 @@ function App() {
               }
             />
 
+
             <Route
               path="/notifications"
               element={
@@ -136,102 +136,113 @@ function App() {
               }
             />
 
-            {/* =====================================================
-                              ADMIN ROUTES
-            ====================================================== */}
+
+
+            {/* ADMIN ROUTES */}
 
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminDashboard />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/giveaways"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminGiveaways />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/entries"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminEntries />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminUsers />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/winners"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminWinners />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/reports"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminReports />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/notifications"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminNotifications />
                 </ProtectedRoute>
               }
             />
 
+
             <Route
               path="/admin/settings"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute adminOnly>
                   <AdminSettings />
                 </ProtectedRoute>
               }
             />
 
-            {/* =====================================================
-                               404 PAGE
-            ====================================================== */}
 
-            <Route
-              path="*"
-              element={<NotFound />}
+
+            {/* 404 */}
+
+            <Route 
+              path="*" 
+              element={<NotFound />} 
             />
+
 
           </Routes>
 
         </main>
 
-        {/* ================= FOOTER ================= */}
 
         <Footer />
 
       </div>
+
     </BrowserRouter>
+
   );
+
 }
+
 
 export default App;

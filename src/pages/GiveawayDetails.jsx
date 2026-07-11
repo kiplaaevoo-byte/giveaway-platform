@@ -1,186 +1,583 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { Trophy, Users, Clock } from "lucide-react";
 
+import { supabase } from "../supabaseClient";
 import useAuth from "../hooks/useAuth";
 
-import {
-  getGiveaway,
-  enterGiveaway,
-  getParticipantCount,
-} from "../services/giveawayService";
-
-import { getRemainingDays } from "../utils/countdown";
 
 export default function GiveawayDetails() {
+
+
   const { id } = useParams();
+
   const navigate = useNavigate();
 
   const { user } = useAuth();
 
+
+
   const [giveaway, setGiveaway] = useState(null);
-  const [participants, setParticipants] = useState(0);
+
+  const [entries, setEntries] = useState(0);
+
+  const [hasEntered, setHasEntered] = useState(false);
+
+  const [timeLeft, setTimeLeft] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [entering, setEntering] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+
+
+
+
 
   useEffect(() => {
+
     loadGiveaway();
-  }, [id]);
+
+  }, [id, user]);
+
+
+
+
+
+
+  useEffect(() => {
+
+
+    if (!giveaway?.end_date) return;
+
+
+
+    const timer = setInterval(() => {
+
+
+      const now = new Date().getTime();
+
+      const end = new Date(
+        giveaway.end_date
+      ).getTime();
+
+
+
+      const distance = end - now;
+
+
+
+      if (distance <= 0) {
+
+        setTimeLeft("Ended");
+
+        clearInterval(timer);
+
+        return;
+
+      }
+
+
+
+      const days = Math.floor(
+        distance /
+        (1000 * 60 * 60 * 24)
+      );
+
+
+      const hours = Math.floor(
+        (distance %
+          (1000 * 60 * 60 * 24))
+        /
+        (1000 * 60 * 60)
+      );
+
+
+      const minutes = Math.floor(
+        (distance %
+          (1000 * 60 * 60))
+        /
+        (1000 * 60)
+      );
+
+
+
+      setTimeLeft(
+        `${days}d ${hours}h ${minutes}m`
+      );
+
+
+
+    }, 1000);
+
+
+
+    return () => clearInterval(timer);
+
+
+  }, [giveaway]);
+
+
+
+
+
+
+
+
 
   async function loadGiveaway() {
-    try {
-      setLoading(true);
 
-      const giveawayData = await getGiveaway(id);
 
-      setGiveaway(giveawayData);
+    setLoading(true);
 
-      const totalParticipants = await getParticipantCount(id);
 
-      setParticipants(totalParticipants);
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
+    const {
+      data,
+      error
+    } = await supabase
+
+      .from("giveaways")
+
+      .select("*")
+
+      .eq(
+        "id",
+        id
+      )
+
+      .single();
+
+
+
+
+
+    if (error) {
+
+      console.error(error);
+
       setLoading(false);
-    }
-  }
 
-  async function handleEnter() {
-    if (!user) {
-      navigate("/login");
       return;
+
     }
 
-    try {
-      setEntering(true);
 
-      setError("");
-      setMessage("");
 
-      const result = await enterGiveaway(
-        giveaway.id,
-        user.id
+    setGiveaway(data);
+
+
+
+
+
+
+    const {
+      count
+    } = await supabase
+
+      .from("entries")
+
+      .select("*", {
+        count: "exact",
+        head: true
+      })
+
+      .eq(
+        "giveaway_id",
+        id
       );
 
-      setMessage(
-        `🎉 Entry Successful!
 
-Ticket Number:
-${result.ticket_number}`
+
+    setEntries(
+      count || 0
+    );
+
+
+
+
+
+
+
+
+    if (user) {
+
+
+      const {
+        data: existing
+      } = await supabase
+
+        .from("entries")
+
+        .select("id")
+
+        .eq(
+          "giveaway_id",
+          id
+        )
+
+        .eq(
+          "user_id",
+          user.id
+        )
+
+        .maybeSingle();
+
+
+
+
+      setHasEntered(
+        Boolean(existing)
       );
 
-      const totalParticipants =
-        await getParticipantCount(giveaway.id);
 
-      setParticipants(totalParticipants);
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setEntering(false);
     }
+
+
+
+
+    setLoading(false);
+
+
   }
+
+
+
+
+
+
+
+
+
+  async function enterGiveaway() {
+
+
+
+    if (!user) {
+
+      navigate("/login");
+
+      return;
+
+    }
+
+
+
+
+
+
+
+    if (hasEntered) {
+
+
+      alert(
+        "You already entered this giveaway"
+      );
+
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+    // PROFILE COMPLETION CHECK
+
+    const {
+      data: profile,
+      error: profileError
+    } = await supabase
+
+      .from("profiles")
+
+      .select(
+        "full_name, phone"
+      )
+
+      .eq(
+        "id",
+        user.id
+      )
+
+      .single();
+
+
+
+
+
+    if (
+      profileError ||
+      !profile?.full_name ||
+      !profile?.phone
+    ) {
+
+
+      alert(
+        "Please complete your profile before entering giveaways."
+      );
+
+
+      navigate("/profile");
+
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    const {
+      error
+    } = await supabase
+
+      .from("entries")
+
+      .insert([
+
+        {
+
+          giveaway_id: id,
+
+          user_id: user.id
+
+        }
+
+      ]);
+
+
+
+
+
+
+
+    if (error) {
+
+
+      alert(
+        error.message
+      );
+
+
+      return;
+
+
+    }
+
+
+
+
+
+
+
+    alert(
+      "Entry submitted successfully!"
+    );
+
+
+
+    setHasEntered(true);
+
+
+    setEntries(
+      previous => previous + 1
+    );
+
+
+  }
+
+
+
+
+
+
+
+
 
   if (loading) {
+
+
     return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        <h2 className="text-2xl font-semibold">
-          Loading Giveaway...
-        </h2>
+
+      <div className="p-10 text-center">
+
+        Loading giveaway...
+
       </div>
+
     );
+
+
   }
+
+
+
+
+
+
 
   if (!giveaway) {
+
+
     return (
-      <div className="flex justify-center items-center min-h-[70vh]">
-        Giveaway not found.
+
+      <div className="p-10">
+
+        Giveaway not found
+
       </div>
+
     );
+
+
   }
 
+
+
+
+
+
+
   return (
-    <section className="max-w-6xl mx-auto px-6 py-12">
 
-      <div className="grid lg:grid-cols-2 gap-10">
+    <div className="min-h-screen bg-slate-100 p-6">
 
-        <img
-          src={giveaway.image}
-          alt={giveaway.title}
-          className="rounded-2xl shadow-xl w-full object-cover"
-        />
 
-        <div>
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow p-8">
 
-          <h1 className="text-4xl font-bold">
-            {giveaway.title}
-          </h1>
 
-          <p className="text-gray-600 mt-4">
-            {giveaway.description}
-          </p>
 
-          <div className="mt-8 space-y-3">
+        <h1 className="text-4xl font-bold">
 
-            <p>
-              <strong>Prize:</strong>{" "}
-              {giveaway.prize}
-            </p>
+          {giveaway.title}
 
-            <p>
-              <strong>Status:</strong>{" "}
-              <span className="text-green-600 font-semibold">
-                {giveaway.status}
-              </span>
-            </p>
+        </h1>
 
-            <p>
-              <strong>Ends:</strong>{" "}
-              {giveaway.end_date}
-            </p>
 
-            <p>
-              <strong>Time Remaining:</strong>{" "}
-              {getRemainingDays(giveaway.end_date)}
-            </p>
+
+
+
+        <p className="mt-4 text-gray-600">
+
+          {giveaway.description}
+
+        </p>
+
+
+
+
+
+
+
+
+        <div className="grid md:grid-cols-3 gap-4 mt-8">
+
+
+
+          <div className="bg-slate-100 p-4 rounded-lg">
+
+            <Users />
 
             <p>
-              <strong>Participants:</strong>{" "}
-              {participants}
+              Entries
             </p>
+
+            <b>
+              {entries}
+            </b>
 
           </div>
 
-          {message && (
-            <div className="mt-6 rounded-xl bg-green-100 border border-green-300 p-4 text-green-700 whitespace-pre-line">
-              {message}
-            </div>
-          )}
 
-          {error && (
-            <div className="mt-6 rounded-xl bg-red-100 border border-red-300 p-4 text-red-700">
-              {error}
-            </div>
-          )}
 
-          <button
-            onClick={handleEnter}
-            disabled={entering}
-            className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-semibold disabled:opacity-50"
-          >
-            {entering
-              ? "Submitting..."
-              : "Enter Giveaway"}
-          </button>
+
+
+
+          <div className="bg-slate-100 p-4 rounded-lg">
+
+            <Clock />
+
+            <p>
+              Time Left
+            </p>
+
+            <b>
+              {timeLeft || "No deadline"}
+            </b>
+
+          </div>
+
+
+
+
+
+
+          <div className="bg-slate-100 p-4 rounded-lg">
+
+            <Trophy />
+
+            <p>
+              Status
+            </p>
+
+            <b>
+              {giveaway.status}
+            </b>
+
+          </div>
+
+
 
         </div>
 
+
+
+
+
+
+
+
+        <button
+
+          onClick={enterGiveaway}
+
+          disabled={
+            hasEntered ||
+            giveaway.status !== "active"
+          }
+
+          className="mt-8 w-full bg-blue-600 text-white py-4 rounded-lg font-bold disabled:bg-gray-400"
+
+        >
+
+          {
+            hasEntered
+              ? "Already Entered"
+              : "Enter Giveaway"
+          }
+
+
+        </button>
+
+
+
+
+
       </div>
 
-    </section>
+
+    </div>
+
   );
+
+
 }

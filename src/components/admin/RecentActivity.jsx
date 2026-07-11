@@ -1,31 +1,39 @@
-export default function RecentActivity() {
-  const activities = [
-    "John entered Samsung S25 Giveaway",
-    "Mary won KES 50,000 Cash Giveaway",
-    "New giveaway created",
-    "Administrator updated platform settings",
-  ];
+export default function RecentActivity(){
+
 
   return (
-    <div className="bg-white rounded-2xl shadow p-6">
 
-      <h2 className="font-bold text-xl mb-6">
+    <div className="bg-white rounded-xl shadow p-6">
+
+
+      <h2 className="text-xl font-bold mb-5">
         Recent Activity
       </h2>
 
-      <div className="space-y-4">
 
-        {activities.map((activity, index) => (
-          <div
-            key={index}
-            className="border-l-4 border-blue-600 pl-4"
-          >
-            {activity}
-          </div>
-        ))}
+      <div className="space-y-3">
+
+
+        <div className="border-b pb-3">
+          New giveaway activity will appear here.
+        </div>
+
+
+        <div className="border-b pb-3">
+          User registrations will appear here.
+        </div>
+
+
+        <div>
+          Winner selections will appear here.
+        </div>
+
 
       </div>
 
+
     </div>
+
   );
+
 }
